@@ -1,0 +1,63 @@
+$buttonIconSize: 24px;
+$wayPointHeight: 32px;
+
+
+.route-waypoint {
+
+  position: relative;
+  width: 95%;
+  height: $wayPointHeight;
+  margin: 0 auto 10px;
+  overflow: visible;
+
+  &__draggable {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    background: rgba(255, 255, 255, 0.5);
+    border: 0;
+    border-radius: 4px;
+    box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.2);
+    touch-action: none;
+    cursor: default;
+
+    &_dragging {
+      box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.5);
+      z-index: 50;
+    }
+  }
+
+  &__name {
+    width: 100%;
+    padding: 2px 0 2px 4px;
+    font-size: 14px;
+    height: 28px;
+    line-height: 28px;
+    vertical-align: baseline;
+    overflow: hidden;
+  }
+
+  &__button {
+    flex: 0 1 $wayPointHeight;
+    width: $wayPointHeight;
+    height: $wayPointHeight;
+    padding: ($wayPointHeight - $buttonIconSize) / 2;
+    line-height: 0;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+
+    &::after {
+      content: "\00d7";
+      display: inline-block;
+      width: $buttonIconSize;
+      height: $buttonIconSize;
+      font-size: $buttonIconSize - 1;
+      text-align: center;
+      line-height: 1;
+      color: #000;
+    }
+
+  }
+}
