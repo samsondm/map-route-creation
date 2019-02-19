@@ -11,10 +11,10 @@
  * See https://goo.gl/2aRDsh
  */
 
-importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.2/workbox-sw.js");
+importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/map-route-creation/precache-manifest.716c8d706a43a9ca93854be9c1bd3936.js"
+  "/map-route-creation/precache-manifest.85dba66b9716deea577c40e3051838c2.js"
 );
 
 workbox.clientsClaim();
