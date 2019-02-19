@@ -10,6 +10,41 @@ $wayPointHeight: 32px;
   margin: 0 auto 10px;
   overflow: visible;
 
+  &__icon {
+    position: relative;
+    flex: 0 0 $wayPointHeight;
+    width: $wayPointHeight;
+    height: $wayPointHeight;
+    padding: ($wayPointHeight - $buttonIconSize) / 2;
+    touch-action: none;
+    cursor: url('../images/openhand.cur'), move;
+    cursor: grab;
+
+    &_dragging {
+      cursor: url('../images/closedhand.cur'), auto;
+      cursor: grabbing;
+    }
+
+    &::after {
+      content: '.';
+      width: 0;
+      height: 0;
+      position: absolute;
+      left: 9px;
+      top: 6px;
+      line-height: 0;
+      color: #000;
+      text-shadow: 0 5px #000,
+        0 10px #000,
+        5px 0 #000,
+        5px 5px #000,
+        5px 10px #000,
+        10px 0 #000,
+        10px 5px #000,
+        10px 10px #000;
+    }
+  }
+
   &__draggable {
     position: absolute;
     width: 100%;
@@ -19,21 +54,25 @@ $wayPointHeight: 32px;
     border: 0;
     border-radius: 4px;
     box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.2);
-    touch-action: none;
+    touch-action: manipulation;
     cursor: default;
 
-    &_dragging {
+
+    &_dragging,
+    &_dragging:hover {
       box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.5);
+      cursor: grabbing;
       z-index: 50;
     }
   }
 
   &__name {
     width: 100%;
-    padding: 2px 0 2px 4px;
+    height: 100%;
+    padding: 2px;
     font-size: 14px;
-    height: 28px;
     line-height: 28px;
+    text-align: left;
     vertical-align: baseline;
     overflow: hidden;
   }

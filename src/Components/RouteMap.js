@@ -1,44 +1,42 @@
 import React from 'react';
-import withCancelToken from '../utility/withCancelToken';
+import withAbortToken from '../utility/withAbortToken';
 import PropTypes from 'prop-types';
 import './RouteMap.scss';
 import Centering from './Centering';
 
 export default class RouteMap extends React.Component {
-
   state = {
     isLoading: true,
     error: null,
     markers: [],
     map: null,
     polyline: null,
-    lastAction: null
+    lastAction: null,
     // viewport: {
     //   height: '',
     //   width: ''
     // }
-  }
+  };
   isPolylineAnimating = false;
   // scrollingElement = document.scrollingElement || document.documentElement;
 
-  _isMounted = { value: false }; // cancel token
   isGoogleApiLoaded = 'google' in window;
-  isGeolocationSupported = "geolocation" in navigator;
+  isGeolocationSupported = 'geolocation' in navigator;
 
   googleMapRef = React.createRef();
-  googleMapApiKey = "AIzaSyC3BmUjtcRlGyF4IXIuW0daNjoSFjDnRxA";
+  googleMapApiKey = 'AIzaSyC-ij1b7n8H0QPCUPptFwUSFqzrTKbvXHc';
 
   markerColors = {
-    start: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
-    default: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
-    end: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
-  }
+    start: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+    default: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+    end: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+  };
 
   getDefaultCenter() {
     return { lat: 55.7558, lng: 37.6173 };
   }
 
-  addMarker = (coordinates) => {
+  addMarker = coordinates => {
     let icon;
     const markersCount = this.state.markers.length;
     if (!markersCount) {
@@ -46,16 +44,18 @@ export default class RouteMap extends React.Component {
     } else {
       icon = this.markerColors.end;
       if (markersCount !== 1) {
-        this.state.markers[markersCount - 1].marker.setIcon(this.markerColors.default);
+        this.state.markers[markersCount - 1].marker.setIcon(
+          this.markerColors.default,
+        );
       }
     }
     return new window.google.maps.Marker({
       position: coordinates,
       map: this.state.map,
       draggable: true,
-      icon
+      icon,
     });
-  }
+  };
 
   updateMarkerIcon(markers, index) {
     if (index === 0) {
@@ -80,8 +80,10 @@ export default class RouteMap extends React.Component {
     // this.updateViewPortSize();
     // window.addEventListener('resize', this.updateViewPortSize);
 
-    this._isMounted.value = true;
-    this.withCancel = withCancelToken(this._isMounted);
+    this.abortToken = {
+      abort: null,
+    };
+    this.withCancel = withAbortToken(this.abortToken);
     try {
       if (!this.isGoogleApiLoaded) {
         await this.withCancel(this.getGoogleApi());
@@ -90,33 +92,40 @@ export default class RouteMap extends React.Component {
       let center;
       if (this.isGeolocationSupported) {
         try {
-          const { coords: { latitude, longitude } } = await this.withCancel(this.getLocation());
-          center = { lat: latitude, lng: longitude }
+          const {
+            coords: { latitude, longitude },
+          } = await this.withCancel(this.getLocation());
+          center = { lat: latitude, lng: longitude };
         } catch (e) {
+          center = null;
         }
       }
       if (!center) center = this.getDefaultCenter();
       const options = {
         center,
-        zoom: 8
-      }
-      const map = new window.google.maps.Map(this.googleMapRef.current, options);
+        zoom: 8,
+      };
+      const map = new window.google.maps.Map(
+        this.googleMapRef.current,
+        options,
+      );
       this.setState({ map });
       this.props.onMapLoad();
     } catch (error) {
-      if (error.type === 'CANCELED') return;
       this.setState({
-        error
+        error,
       });
     } finally {
       this.setState({
-        isLoading: false
-      })
+        isLoading: false,
+      });
     }
   }
 
   componentWillUnmount() {
-    this._isMounted.value = false;
+    if (this.abortToken.abort){
+    this.abortToken.abort();
+  }
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -142,24 +151,38 @@ export default class RouteMap extends React.Component {
         const content = `
         <div class="route-map__popup">
           <div class="route-map__popup__name">${name}</div>
-          ${address ? `<div class="route-map__popup__address">${address.formatted_address}</div>` : ``}
+          ${
+            address
+              ? `<div class="route-map__popup__address">${
+                  address.formatted_address
+                }</div>`
+              : ``
+          }
         </div>`;
         popup.setContent(content);
-        popup.open(this.state.map, marker)
+        popup.open(this.state.map, marker);
       });
       //add marker to markers array
       newMarkers = [...this.state.markers, { id, marker }];
-    } else if (action === 'DELETE' && prevState.markers.length === this.state.markers.length) {
+    } else if (
+      action === 'DELETE' &&
+      prevState.markers.length === this.state.markers.length
+    ) {
       // DELETE marker block
-      const markerIndex = this.state.markers.findIndex(marker => marker.id === id);
+      const markerIndex = this.state.markers.findIndex(
+        marker => marker.id === id,
+      );
       if (markerIndex === -1) return;
       this.state.markers[markerIndex].marker.setMap(null);
-      newMarkers = [...this.state.markers.slice(0, markerIndex), ...this.state.markers.slice(markerIndex + 1)];
+      newMarkers = [
+        ...this.state.markers.slice(0, markerIndex),
+        ...this.state.markers.slice(markerIndex + 1),
+      ];
       if (markerIndex === newMarkers.length && newMarkers.length !== 0) {
         // if last item has been deleted than update only last marker of a non empty array
         this.updateMarkerIcon(newMarkers, newMarkers.length - 1);
       } else if (!markerIndex && newMarkers.length !== 0) {
-        // if first item has been deleted than update only first marker of a non empty array 
+        // if first item has been deleted than update only first marker of a non empty array
         this.updateMarkerIcon(newMarkers, 0);
       }
     } else if (action === 'MOVE' && this.state.markers[newIndex].id !== id) {
@@ -168,33 +191,39 @@ export default class RouteMap extends React.Component {
       newMarkers = [...this.state.markers];
       const draggedMarker = newMarkers.splice(oldIndex, 1)[0];
       newMarkers.splice(newIndex, 0, draggedMarker);
-      for (let i = Math.min(oldIndex, newIndex); i <= Math.max(oldIndex, newIndex); i++) {
+      for (
+        let i = Math.min(oldIndex, newIndex);
+        i <= Math.max(oldIndex, newIndex);
+        i++
+      ) {
         this.updateMarkerIcon(newMarkers, i);
       }
     }
     // get new polyline
     let polyline;
-    if ((newMarkers && newMarkers.length !== this.state.markers.length) || (action === 'MOVE' && this.state.markers[newIndex].id !== id)) {
-
+    if (
+      (newMarkers && newMarkers.length !== this.state.markers.length) ||
+      (action === 'MOVE' && this.state.markers[newIndex].id !== id)
+    ) {
       polyline = this.updatePolyline(newMarkers);
       this.setState({
         markers: newMarkers,
         polyline,
-        lastAction: action
+        lastAction: action,
       });
     }
     if (this.state.lastAction === 'POLYLINE') {
       this.setState({
-        lastAction: null
-      })
+        lastAction: null,
+      });
     }
   }
 
-  reverseGeocode = async (location) => {
+  reverseGeocode = async location => {
     try {
       const geocoder = new window.google.maps.Geocoder();
       return await new Promise((resolve, reject) => {
-        geocoder.geocode({ 'location': location }, (results, status) => {
+        geocoder.geocode({ location: location }, (results, status) => {
           if (status === 'OK') {
             resolve(results[0]);
           } else {
@@ -202,14 +231,12 @@ export default class RouteMap extends React.Component {
           }
         });
       });
+    } catch (err) {
+      return null;
     }
-    catch (err) {
-      console.error('reverse geocode error caught', err);
-    }
-  }
+  };
 
-
-  updatePolyline = (markers) => {
+  updatePolyline = markers => {
     // clear polyline
     if (this.state.polyline) this.state.polyline.setMap(null);
     // draw lines if more than 1 marker
@@ -222,25 +249,27 @@ export default class RouteMap extends React.Component {
         geodesic: true,
         strokeColor: '#FF0000',
         strokeOpacity: 1.0,
-        strokeWeight: 2
+        strokeWeight: 2,
       });
       polyline.setMap(this.state.map);
       return polyline;
     }
     return null;
-  }
+  };
 
   dragPolylineAnimation = () => {
-    if (!this.isPolylineAnimating || !this._isMounted) return;
-    this.setState(prevState => {
-      const polyline = this.updatePolyline(prevState.markers);
-      return {
-        polyline,
-        lastAction: 'POLYLINE'
-      }
-    }, () => this.isPolylineAnimating = false);
-
-  }
+    if (!this.isPolylineAnimating) return;
+    this.setState(
+      prevState => {
+        const polyline = this.updatePolyline(prevState.markers);
+        return {
+          polyline,
+          lastAction: 'POLYLINE',
+        };
+      },
+      () => (this.isPolylineAnimating = false),
+    );
+  };
 
   async getGoogleApi() {
     try {
@@ -248,10 +277,10 @@ export default class RouteMap extends React.Component {
         const googleApi = document.createElement('script');
         const key = this.googleMapApiKey;
         googleApi.src = `https://maps.googleapis.com/maps/api/js?key=${key}`;
-        googleApi.type = "text/javascript";
+        googleApi.type = 'text/javascript';
         googleApi.async = false;
-        googleApi.onload = (e) => resolve('google api loaded');
-        googleApi.onerror = (e) => reject(new Error(e));
+        googleApi.onload = e => resolve('google api loaded');
+        googleApi.onerror = e => reject(new Error(e));
         document.body.appendChild(googleApi);
       });
     } catch (err) {
@@ -261,30 +290,43 @@ export default class RouteMap extends React.Component {
 
   getLocation = async () => {
     try {
-      const position =
-        await new Promise((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(
-            location => resolve(location),
-            () => reject(Error('geolocation blocked'))
-          );
-        });
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          location => resolve(location),
+          () => reject(Error('geolocation blocked')),
+        );
+      });
       return position;
-    }
-    catch (err) {
+    } catch (err) {
       throw err;
     }
-  }
+  };
 
   render() {
-    const mapStyle = this.state.isLoading || this.state.error ? { display: 'none' } : { display: 'block' };
+    const mapStyle =
+      this.state.isLoading || this.state.error
+        ? { display: 'none' }
+        : { display: 'block' };
     // const mapStyle = {
     //   ...this.state.viewport
     // }
     return (
-      <div className={"route-map " + this.props.className}>
-        {this.state.isLoading && <Centering><div className="route-map__loading">Loading</div></Centering>}
-        {this.state.error && <Centering><div className="route-map__error">{this.state.error.message}</div></Centering>}
-        <div className="route-map__map" style={mapStyle} ref={this.googleMapRef} />
+      <div className={'route-map ' + this.props.className}>
+        {this.state.isLoading && (
+          <Centering>
+            <div className="route-map__loading">Loading</div>
+          </Centering>
+        )}
+        {this.state.error && (
+          <Centering>
+            <div className="route-map__error">{this.state.error.message}</div>
+          </Centering>
+        )}
+        <div
+          className="route-map__map"
+          style={mapStyle}
+          ref={this.googleMapRef}
+        />
       </div>
     );
   }
@@ -296,6 +338,6 @@ RouteMap.propTypes = {
     id: PropTypes.number,
     name: PropTypes.string,
     action: PropTypes.string,
-    newIndex: PropTypes.number
+    newIndex: PropTypes.number,
   }),
 };

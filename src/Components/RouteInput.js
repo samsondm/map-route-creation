@@ -11,12 +11,14 @@ export default class RouteInput extends React.Component {
   componentDidMount() {
     if (this.props.isMapLoaded) {
       this.inputRef.current.focus();
+      this.inputRef.current.click();
     }
   }
 
   componentDidUpdate(prevProps) {
     if (prevProps.isMapLoaded !== this.props.isMapLoaded) {
       this.inputRef.current.focus();
+      this.inputRef.current.click();
     }
   }
 

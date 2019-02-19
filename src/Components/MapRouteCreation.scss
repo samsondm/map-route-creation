@@ -6,6 +6,7 @@
   max-width: 1280px;
   margin-left: auto;
   margin-right: auto;
+  overflow: hidden;
   box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.2);
   -webkit-tap-highlight-color: transparent;
 
@@ -45,9 +46,5 @@
     background: #FFF;
     z-index: 10;
     cursor: default;
-
-    &_dragging {
-      cursor: grabbing;
-    }
   }
 }

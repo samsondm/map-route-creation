@@ -1,15 +1,16 @@
 {
   "name": "map-route-creation",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "homepage": "https://samsondm.github.io/map-route-creation/",
   "private": true,
   "dependencies": {
-    "node-sass": "^4.9.4",
-    "prop-types": "^15.6.2",
-    "react": "^16.5.2",
-    "react-app-polyfill": "^0.1.3",
-    "react-dom": "^16.5.2",
-    "react-scripts": "2.0.5"
+    "ajv": "^6.9.1",
+    "node-sass": "^4.11.0",
+    "prop-types": "^15.7.2",
+    "react": "^16.8.2",
+    "react-app-polyfill": "^0.2.1",
+    "react-dom": "^16.8.2",
+    "react-scripts": "^2.1.5"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -21,7 +22,15 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": [
+      "eslint:recommended",
+      "react-app",
+      "prettier",
+      "prettier/react"
+    ],
+    "rules": {
+      "react/jsx-filename-extension": false
+    }
   },
   "browserslist": [
     ">0.2%",
@@ -30,10 +39,18 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "enzyme": "^3.7.0",
-    "enzyme-adapter-react-16": "^1.6.0",
+    "@types/enzyme": "^3.1.18",
+    "@types/jest": "^24.0.6",
+    "@types/lolex": "^0.0.0",
+    "enzyme": "^3.9.0",
+    "enzyme-adapter-react-16": "^1.9.1",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-config-prettier": "^4.0.0",
     "gh-pages": "^2.0.1",
-    "jest-dom": "^2.1.0",
-    "react-testing-library": "^5.2.1"
+    "jest-dom": "^2.1.1",
+    "lolex": "^3.1.0",
+    "prettier": "^1.16.4",
+    "react-testing-library": "^5.8.0",
+    "typescript": "^3.3.3"
   }
 }
